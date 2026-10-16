@@ -1,78 +1,85 @@
-# Site Web Réplique - Atomy (Partenaire : Lusine Sargsyan)
+# Atomy — site de partenaire
 
-Ce projet est un clone fidèle, autonome, optimisé et 100% prêt à l'emploi de la page d'atterrissage Atomy pour la distributrice **Lusine Sargsyan** (Лусине Саргсян).
+Reproduction de la page de référence, avec catalogue local et interface en russe.
+Les informations à remplacer et les éléments requis avant publication sont dans
+[TODO.md](TODO.md). La configuration publique est dans [js/config.js](js/config.js).
 
----
+## Démarrage
 
-## 📁 Structure du Projet
+Depuis ce dossier :
 
-```text
-Atomy/
-├── index.html                   # Page principale complète, lisible et personnalisée
-├── README.md                    # Guide d'utilisation et de configuration
-├── css/
-│   └── style.css                # Styles Bootstrap et carrousels (avec polices locales)
-├── js/
-│   ├── app.js                   # Moteur JS complet (catalogue, carrousels, formulaire, chatbot intelligent)
-│   └── country_select.js        # Sélecteur de nationalités et drapeaux
-├── data/
-│   ├── products.json            # Base des 190 produits Atomy (prix, PV, catégories)
-│   └── products-details.json    # Fiches détaillées des produits (ingrédients, usage, etc.)
-└── assets/                      # 57 ressources locales (logos, photos, certificats, avis)
-    ├── media/
-    │   └── consultant_bd41d427.jpg   # Photo du consultant
-    └── static/websites/
-        ├── fonts/               # Polices typographiques TildaSans
-        └── images/              # Bannières, avis clients, certificats, carte
-```
-
----
-
-## 🤖 Gestion et Fonctionnement du Chatbot
-
-Dans le site original, le chatbot dépendait d'un serveur tiers fermé (`mllm.me/api/chat/`). Pour rendre votre site **totalement autonome et infaillible**, le chatbot a été modernisé avec un moteur conversationnel intelligent côté client dans `js/app.js` :
-
-### 1. Comment fonctionne le Chatbot actuellement (Mode Intelligent Autonome)
-- **Bulle flottante avec statut en ligne :** Affiche le portrait et le nom de **Lusine Sargsyan**.
-- **Message d'accueil & Boutons de raccourcis :**
-  - 📝 *Бесплатная регистрация* : ouvre instantanément le formulaire d'inscription en 3 étapes.
-  - 🚚 *Доставка и оплата* : explique les 819 points relais et la livraison offerte.
-  - 🛒 *Каталог товаров* : recherche automatique dans les 190 produits Atomy.
-  - 💬 *Написать в WhatsApp* : ouvre WhatsApp avec un message pré-rempli pour Lusine Sargsyan.
-- **Réponses automatiques par mots-clés :** si un visiteur pose des questions sur l'inscription, les prix, les crèmes, le dentifrice, la livraison, le bot lui répond immédiatement et lui propose le bon bouton d'action.
-
-### 2. Personnaliser le numéro WhatsApp du Chatbot
-Dans [`index.html`](file:///c:/Users/taron/Desktop/Atomy/index.html), dans le bloc de configuration en bas de page :
-```javascript
-window.siteContent = {
-    isAtmRegEnabled: false,
-    consultantName: 'Lusine Sargsyan',
-    consultantWa: '79595269800',       // Remplacez par votre numéro international
-    consultantTg: 'lusine_sargsyan'     // Votre pseudo Telegram
-};
-```
-
----
-
-## 🚀 Comment Lancer le Site
-
-Pour des raisons de sécurité du navigateur (lecture de fichiers JSON locaux `products.json`), lancez le site avec un serveur local HTTP :
-
-### Avec Python :
-Dans le terminal (dossier `Atomy`) :
-```bash
+```sh
 python -m http.server 8080
 ```
-Puis ouvrez : [http://localhost:8080](http://localhost:8080)
 
-### Avec Node.js :
-```bash
-npx serve .
+Ouvrir <http://localhost:8080>. Utiliser HTTP plutôt que l'ouverture directe du
+fichier : les modules JavaScript et le catalogue JSON en ont besoin.
+
+## Organisation
+
+```text
+index.html               structure de la page
+js/
+  app.js                 initialisation des composants
+  config.js              identité, contacts, partage, API de demandes
+  catalog.js             catalogue, recherche, fiches, liens directs
+  registration.js        étapes, validation, transmission des demandes
+  chat.js                assistant local à règles et suggestions produits
+  countries.js           pays et sélecteur natif
+  personalization.js     coordonnées et identité depuis la configuration
+  ui.js                  navigation, carrousels, vidéo, bannière
+  utils.js               recherche, téléphone, copie, envoi HTTP
+  vendor/                Bootstrap et Swiper, conservés séparément
+css/
+  style.css              styles applicatifs lisibles
+  vendor/                FastBootstrap et Swiper
+assets/                  polices, visuels et image de remplacement
+data/                    190 produits et leurs fiches détaillées
+tests/                   tests de régression et parcours navigateur
 ```
 
----
+Les fichiers vendor restent minifiés ; ils ne contiennent pas le code métier.
+Le code applicatif est constitué de modules ES natifs, sans framework ni compilation.
+Quelques fonctions sont exposées dans `app.js` pour les actions HTML existantes.
+Les descriptions HTML proviennent des JSON éditoriaux locaux : ne pas les remplacer
+par du contenu utilisateur non fiable sans nettoyage.
 
-## 👤 Informations Personnalisées
-- **Nom du distributeur :** Lusine Sargsyan (Лусине Саргсян)
-- **Rôle :** Partenaire et distributeur officiel Atomy
-- **Photo du profil :** [`assets/media/consultant_bd41d427.jpg`](file:///c:/Users/taron/Desktop/Atomy/assets/media/consultant_bd41d427.jpg) (remplacez ce fichier pour changer votre portrait).
+## État fonctionnel
+
+Le catalogue, la recherche, les fiches, les carrousels, la FAQ et l'assistant local
+fonctionnent côté navigateur. L'assistant répond par mots-clés ; il n'appelle pas d'IA.
+Les coordonnées vides sont masquées, et ne dirigent pas vers celles du modèle.
+
+**Le formulaire n'est pas connecté à un service de réception.** Par défaut il affiche
+un aperçu explicite et ne transmet ni ne conserve les données. Après configuration
+d'une API, la confirmation dépend d'une réponse HTTP réussie et d'un JSON
+`{ "success": true }`. Il ne crée pas de compte Atomy. Voir le contrat dans TODO.md.
+Aucun mot de passe de membre n'est conservé dans les cookies ou le stockage local.
+
+Les images produits et la vidéo restent externes. Les données commerciales, règles,
+textes juridiques et visuels de référence doivent être validés avant publication.
+Les métadonnées absolues doivent être finalisées dans le HTML pour les robots sociaux.
+
+## Vérification et formatage
+
+```sh
+npm install
+npm test
+npm run test:browser
+npm run format
+```
+
+Les tests navigateur utilisent Chrome installé et démarrent un serveur local de test.
+Pour un poste sans Chrome, adapter `playwright.config.js` et installer le navigateur
+Playwright choisi. Aucun test ne transmet de données à un service réel.
+
+## Langues
+
+Le sélecteur en haut de page propose le français (par défaut), l’anglais et le russe.
+Le choix est mémorisé localement avec la clé `atomy_language`. Le changement de langue
+se fait sans rechargement et conserve les valeurs du formulaire et les filtres du catalogue.
+Les traductions sont dans `js/locales/`, gérées par `js/i18n.js`. Les noms des 190 produits
+sont traduits ; les prix restent en roubles. Les fiches détaillées, les documents juridiques
+et les textes intégrés aux images restent en russe avec une indication de langue source.
+Le chat est disponible dans les trois langues ; son historique repart de l’accueil
+lorsqu’on change de langue.
